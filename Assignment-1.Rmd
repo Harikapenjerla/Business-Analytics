@@ -1,0 +1,199 @@
+---
+title: "Business Analytics Assignment-1"
+author: "Harika"
+date: "10/15/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Part A Descriptive Statistics & Normal Distribution.
+
+# Solution 1a
+pnorm(700, mean = 494, sd= 100, lower.tail = FALSE)
+
+# Solution 1b
+pnorm(450,mean=494,sd=100)-pnorm(350,mean=494,sd=100)
+
+# Solution 2
+z<-qnorm(0.8665)
+x=449-(z*36)
+print(x)
+
+#Solution 3
+Kent=c(59, 68, 78, 60) 
+Los_Angeles=c(90, 82, 78, 75) 
+k_mean <-  mean(Kent)
+L_mean  <- mean(Los_Angeles)
+num <- sum((Kent-k_mean)*(Los_Angeles-L_mean))
+dem1 <- sqrt(sum((Kent-k_mean)^2))
+dem2 <- sqrt(sum((Los_Angeles-L_mean)^2))
+dem <- dem1 *dem2
+Correlation = num / dem
+Correlation
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+# Read data file and knowing basic information regarding data
+library(caret)
+library(dplyr)
+data <- read.csv("Online_Retail(2).csv")
+head(data)
+str(data)
+colnames(data)
+nrow(data)
+
+#Solution 4
+summary(data$Country)
+Country_totalnumber <- table(data$Country)
+transaction_percent <-round(100*prop.table(Country_totalnumber), digits = 3)
+percentage <- cbind(Country_totalnumber,transaction_percent)
+answer <- subset(percentage,transaction_percent>1)
+answer
+
+#Solution 5
+data <- data %>% mutate(TransactionValue= Quantity * UnitPrice)
+summary(data$TransactionValue)
+
+#Solution 6
+dataneeded <- summarise(group_by(data,Country),sum_1= sum(TransactionValue))
+Transaction <- filter(dataneeded,sum_1 >130000)
+View(Transaction)
+
+# Solution 8
+selecting <- select(data,Country,TransactionValue)
+histdata <-filter(selecting, Country=="Germany")
+hist(histdata$TransactionValue, n=100)
+
+
+
+#Solution 9
+#Source:using tapply from datacamp.
+
+Highestno <- tapply(data$TransactionValue, data$CustomerID, length)
+sol9 <-which.max(Highestno)
+sol9
+Valuable <- tapply(data$TransactionValue, data$CustomerID,sum)
+which.max(Valuable)
+
+
+
+#Solution 10
+
+missing_values <- colMeans(is.na(data))
+missing_values
+
+#Solution 11
+data11 <- data %>% filter(is.na(CustomerID)) %>% group_by(Country)
+summary(data11$Country)
+
+#Solution 13
+newtable <- filter(data,Country=="France")
+cancel <- nrow(subset(newtable,Quantity<0))
+cancel
+totalrow <- nrow(newtable)
+TEST2=(cancel/totalrow)*100 #return rate in %
+TEST2
+
+
+#Solution14
+a14 <- tapply(data$TransactionValue,data$StockCode,sum)
+a14[which.max(a14)]
+
+#Solution 15
+a15 <- unique(data$CustomerID)
+#a15
+length(a15)
+
+```
+
+
+```{r}
+#Solution 7(Golden Questions)
+# According to the instructions given 
+
+Temp=strptime(data$InvoiceDate,format='%m/%d/%Y %H:%M',tz='GMT')
+head(Temp)
+data$New_Invoice_Date <- as.Date(Temp)
+data$New_Invoice_Date[20000]- data$New_Invoice_Date[10]
+data$Invoice_Day_Week= weekdays(data$New_Invoice_Date)
+data$New_Invoice_Hour = as.numeric(format(Temp, "%H"))
+data$New_Invoice_Month = as.numeric(format(Temp, "%m"))
+
+#7(a)
+tapply(data$InvoiceNo, data$Invoice_Day_Week, NROW)/NROW(data$InvoiceNo) * 100
+
+
+#7(b)
+sol7 <- data %>% group_by(Invoice_Day_Week) %>% summarise(percent2 = sum(TransactionValue)/sum(data$TransactionValue)*100)
+sol7
+
+#c
+str(data$New_Invoice_Month)
+a <- table(data$New_Invoice_Month)
+a2 <-round(100*prop.table(a), digits = 3)
+a2
+
+#d
+data <- data %>% mutate(TransactionValue= Quantity * UnitPrice)
+head(data)
+data %>% filter(Country == 'Australia') %>% group_by(New_Invoice_Date) %>% summarise(count_1=n()) %>% arrange(desc(count_1))
+
+
+```
+
+
+```{r}
+#12
+newdata <- data[,c(7,10)]
+df1 <-newdata %>% group_by(CustomerID) %>% summarise(count12=max(New_Invoice_Date)-min(New_Invoice_Date))
+df1
+newdata2 <- df[apply(df !=0, 1, all),]                                             
+sum(newdata2$count12)
+value2 <- nrow(newdata2)                                          
+ avg <- value / value2    
+ avg
+```
+```{r}
+#Solution 7(Golden Questions)
+# According to the instructions given 
+
+Temp=strptime(data$InvoiceDate,format='%m/%d/%Y %H:%M',tz='GMT')
+head(Temp)
+data$New_Invoice_Date <- as.Date(Temp)
+data$New_Invoice_Date[20000]- data$New_Invoice_Date[10]
+data$Invoice_Day_Week= weekdays(data$New_Invoice_Date)
+data$New_Invoice_Hour = as.numeric(format(Temp, "%H"))
+data$New_Invoice_Month = as.numeric(format(Temp, "%m"))
+
+#7(a)
+tapply(data$InvoiceNo, data$Invoice_Day_Week, NROW)/NROW(data$InvoiceNo) * 100
+
+
+#7(b)
+sol7 <- data %>% group_by(Invoice_Day_Week) %>% summarise(percent2 = sum(TransactionValue)/sum(data$TransactionValue)*100)
+sol7
+
+#c
+str(data$New_Invoice_Month)
+a <- table(data$New_Invoice_Month)
+a2 <-round(100*prop.table(a), digits = 3)
+a2
+
+#d
+data <- data %>% mutate(TransactionValue= Quantity * UnitPrice)
+head(data)
+data %>% filter(Country == 'Australia') %>% group_by(New_Invoice_Date) %>% summarise(count_1=n()) %>% arrange(desc(count_1))
+```
+```{r}
+
+```
+
